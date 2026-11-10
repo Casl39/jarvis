@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#03060b" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="J.A.R.V.I.S. — голосовой ассистент на базе OpenCode" />
+  <title>J.A.R.V.I.S.</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-state="offline">
+
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-scan" aria-hidden="true"></div>
+
+  <div id="fileBanner" class="banner" hidden>
+    <strong>Файл открыт напрямую.</strong>
+    <span>Запустите <code>python serve.py --open</code> — так работают связь с OpenCode и микрофон.</span>
+  </div>
+
+  <div class="app" id="app">
+
+    <header class="hud-top">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4">
+            <circle cx="16" cy="16" r="13" opacity=".45"/>
+            <circle cx="16" cy="16" r="8.5" opacity=".8"/>
+            <circle cx="16" cy="16" r="3.6" fill="currentColor" stroke="none"/>
+            <path d="M16 1.5v5M16 25.5v5M1.5 16h5M25.5 16h5" opacity=".7"/>
+          </svg>
+        </span>
+        <div class="brand-text">
+          <h1>J.A.R.V.I.S.</h1>
+          <p>Just A Rather Very Intelligent System</p>
+        </div>
+      </div>
+
+      <div class="status-cluster">
+        <button id="statusBtn" class="status-pill" type="button" title="Состояние соединения">
+          <span class="dot" id="statusDot"></span>
+          <span id="statusText">Подключение…</span>
+        </button>
+        <button id="btnHistory" class="icon-btn" type="button" title="История диалогов" aria-label="История">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5V10H9"/><path d="M12 7.5V12l3.2 2"/>
+          </svg>
+        </button>
+        <button id="btnSettings" class="icon-btn" type="button" title="Настройки" aria-label="Настройки">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <circle cx="12" cy="12" r="3.2"/>
+            <path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <div class="core-wrap">
+        <div class="core" id="core" aria-hidden="true">
+          <span class="ring r1"></span>
+          <span class="ring r2"></span>
+          <span class="ring r3"></span>
+          <span class="ring r4"></span>
+          <span class="glow"></span>
+          <span class="orb"><span class="orb-inner"></span></span>
+        </div>
+        <div class="core-label">
+          <span id="coreState" class="core-state">ОФФЛАЙН</span>
+          <span id="coreHint" class="core-hint">нет связи с OpenCode</span>
+        </div>
+      </div>
+
+      <section class="transcript" id="transcript" aria-live="polite"></section>
+    </main>
+
+    <footer class="hud-bottom">
+      <div class="interim" id="interim" hidden></div>
+      <form class="composer" id="composer" autocomplete="off">
+        <button type="button" class="btn-round mic" id="btnMic" title="Говорить (Ctrl+Space)" aria-label="Говорить">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <rect x="9" y="2.6" width="6" height="11" rx="3"/>
+            <path d="M5.2 11a6.8 6.8 0 0 0 13.6 0"/><path d="M12 17.8V21"/><path d="M8.6 21h6.8"/>
+          </svg>
+        </button>
+        <div class="input-wrap">
+          <input id="input" type="text" placeholder="Спросите Джарвиса…" aria-label="Сообщение" />
+          <span class="input-hint" id="inputHint">Enter — отправить</span>
+        </div>
+        <button type="submit" class="btn-round send" id="btnSend" title="Отправить" aria-label="Отправить">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+            <path d="M3.4 11.4 20.6 4l-7.2 17.2-2.2-7.4-7.8-2.4Z"/>
+          </svg>
+        </button>
+        <button type="button" class="btn-round stop" id="btnStop" title="Остановить" aria-label="Остановить" hidden>
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>
+        </button>
+      </form>
+      <div class="hints">
+        <span><kbd>Ctrl</kbd>+<kbd>Space</kbd> — микрофон</span>
+        <span id="wakeHint" hidden><span class="hint-dot"></span> режим «Джарвис» включён</span>
+        <span id="sessionHint" class="mono-dim"></span>
+      </div>
+    </footer>
+
+    <div class="perm" id="perm" hidden role="alertdialog" aria-live="assertive">
+      <div class="perm-head"><span class="perm-dot"></span> ТРЕБУЕТСЯ ПОДТВЕРЖДЕНИЕ</div>
+      <div class="perm-body">
+        <p class="perm-action" id="permAction"></p>
+        <pre class="perm-res" id="permRes"></pre>
+      </div>
+      <div class="perm-actions">
+        <button class="btn primary" type="button" data-decision="once">Разрешить</button>
+        <button class="btn" type="button" data-decision="always">Всегда</button>
+        <button class="btn ghost" type="button" data-decision="reject">Отклонить</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Настройки">
+    <div class="drawer-head">
+      <h2>Настройки</h2>
+      <button class="icon-btn" id="btnCloseDrawer" type="button" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <section class="fieldset">
+        <h3>Соединение</h3>
+        <label class="field">
+          <span>Адрес OpenCode</span>
+          <input id="setUrl" type="text" spellcheck="false" placeholder="/oc или http://127.0.0.1:4096" />
+          <small>По умолчанию <code>/oc</code> — встроенный прокси. В настольном приложении сервер OpenCode запускается автоматически.</small>
+        </label>
+        <label class="field">
+          <span>Рабочая папка</span>
+          <input id="setDir" type="text" spellcheck="false" placeholder="C:\projects\app или /home/user/app" />
+          <small>Папка, в которой Джарвис будет работать с файлами. Пусто — папка сервера.</small>
+        </label>
+        <label class="field">
+          <span>Модель</span>
+          <select id="setModel"></select>
+        </label>
+        <label class="field">
+          <span>Агент</span>
+          <select id="setAgent"></select>
+        </label>
+        <div class="row">
+          <button class="btn" id="btnTest" type="button">Проверить связь</button>
+          <span class="conn-note" id="connNote"></span>
+        </div>
+      </section>
+
+      <section class="fieldset">
+        <h3>Голос</h3>
+        <label class="field">
+          <span>Язык распознавания</span>
+          <select id="setLang">
+            <option value="ru-RU">Русский</option>
+            <option value="en-US">English (US)</option>
+            <option value="uk-UA">Українська</option>
+            <option value="de-DE">Deutsch</option>
+            <option value="es-ES">Español</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Движок озвучки</span>
+          <select id="setTtsEngine">
+            <option value="auto">Авто — нейроголос, если доступен</option>
+            <option value="neural">Нейроголос (Edge)</option>
+            <option value="browser">Голос браузера</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Нейроголос</span>
+          <select id="setTtsVoice">
+            <option value="auto">Авто (по языку)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Голос браузера (резерв)</span>
+          <select id="setVoice"></select>
+        </label>
+        <label class="field range">
+          <span>Скорость речи (браузер) <output id="rateOut">1.0</output></span>
+          <input id="setRate" type="range" min="0.6" max="1.6" step="0.05" />
+        </label>
+        <label class="switch">
+          <input id="setAutoSpeak" type="checkbox" />
+          <span class="track"><span class="thumb"></span></span>
+          <span class="switch-label">Озвучивать ответы</span>
+        </label>
+        <label class="switch">
+          <input id="setWake" type="checkbox" />
+          <span class="track"><span class="thumb"></span></span>
+          <span class="switch-label">Режим «Джарвис» (по имени)</span>
+        </label>
+        <label class="switch">
+          <input id="setCues" type="checkbox" />
+          <span class="track"><span class="thumb"></span></span>
+          <span class="switch-label">Звуковые сигналы</span>
+        </label>
+        <div class="row">
+          <button class="btn" id="btnVoiceTest" type="button">Проверить голос</button>
+        </div>
+      </section>
+
+      <section class="fieldset">
+        <h3>Сеанс</h3>
+        <div class="row wrap">
+          <button class="btn" id="btnNew" type="button">Новый диалог</button>
+          <button class="btn ghost" id="btnClear" type="button">Очистить экран</button>
+        </div>
+        <p class="field-note" id="sessionInfo">Сеанс ещё не создан.</p>
+      </section>
+
+      <section class="fieldset">
+        <h3>О системе</h3>
+        <p class="field-note">
+          J.A.R.V.I.S. — интерфейс к серверу <strong>OpenCode</strong>. Модель, инструменты и доступ к файлам
+          определяются настройками OpenCode. Речь распознаётся браузером, ответы озвучивает
+          нейроголос Edge (с резервом на голос браузера).
+        </p>
+        <p class="field-note mono-dim" id="aboutInfo">версия OpenCode: —</p>
+        <button class="btn ghost small" id="btnReset" type="button">Сбросить настройки</button>
+      </section>
+    </div>
+  </aside>
+
+  <aside class="sheet" id="historyPanel" aria-hidden="true" aria-label="История">
+    <div class="drawer-head">
+      <h2>История</h2>
+      <button class="icon-btn" id="btnCloseHistory" type="button" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="historyList"></div>
+  </aside>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <noscript>
+    <p style="padding:2rem;color:#d8f2fa">Для работы Джарвиса нужен JavaScript.</p>
+  </noscript>
+
+  <script src="js/api.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

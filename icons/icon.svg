@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="J.A.R.V.I.S.">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#0b2634"/>
+      <stop offset="0.55" stop-color="#061119"/>
+      <stop offset="1" stop-color="#03060b"/>
+    </radialGradient>
+    <radialGradient id="orb" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#f4feff"/>
+      <stop offset="0.22" stop-color="#a9f6ff"/>
+      <stop offset="0.48" stop-color="#45d8f2"/>
+      <stop offset="0.72" stop-color="#1487a6"/>
+      <stop offset="0.9" stop-color="#083645"/>
+      <stop offset="1" stop-color="#06222d"/>
+    </radialGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#35e6ff" stroke-opacity="0.28" stroke-width="3"/>
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#35e6ff" stroke-opacity="0.5"
+          stroke-width="11" stroke-dasharray="7 15" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="98" fill="none" stroke="#ffb545" stroke-opacity="0.35"
+          stroke-width="2" stroke-dasharray="3 26" stroke-linecap="round"/>
+
+  <circle cx="256" cy="256" r="96" fill="#35e6ff" opacity="0.3" filter="url(#blur)"/>
+  <circle cx="256" cy="256" r="78" fill="url(#orb)"/>
+  <circle cx="256" cy="256" r="42" fill="#eaffff" opacity="0.85" filter="url(#soft)"/>
+  <circle cx="256" cy="256" r="22" fill="#ffffff" opacity="0.95"/>
+
+  <g stroke="#35e6ff" stroke-width="3" stroke-linecap="round" opacity="0.6">
+    <path d="M256 34v26"/>
+    <path d="M256 452v26"/>
+    <path d="M34 256h26"/>
+    <path d="M452 256h26"/>
+  </g>
+</svg>

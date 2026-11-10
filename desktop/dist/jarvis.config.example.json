@@ -1,0 +1,7 @@
+﻿{
+    "port":  8737,
+    "opencodeBin":  "",
+    "opencodeUrl":  "http://127.0.0.1:4096",
+    "devTools":  false,
+    "autoStartServer":  true
+}
